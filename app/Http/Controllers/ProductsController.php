@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Products;
+use App\Models\ContactForm;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Mail\ContactFormMail;
+use Mail;
 // use Stripe;
 
 class ProductsController extends Controller
@@ -37,31 +40,27 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
-        $user = User::firstOrfail();
-        $input = $request->all();
-        $token =  $request->stripeToken;
-        $paymentMethod = $request->paymentMethod;
+        $model = new ContactForm;
+        // dd($request);
         try {
-
-            Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-            
-            if (is_null($user->stripe_id)) {
-                $stripeCustomer = $user->createAsStripeCustomer();
-            }
-
-            \Stripe\Customer::createSource(
-                $user->stripe_id,
-                ['source' => $token]
-            );
-
-            $user->newSubscription('test',$input['plane'])
-                ->create($paymentMethod, [
-                'email' => $user->email,
-            ]);
-
-            return back()->with('success','Subscription is completed.');
+            $model->name = $request->name;
+            $model->phone = $request->phone;
+            $model->email = $request->email;
+            $model->service = $request->service;
+            $model->message = $request->message;
+            $model->save();
+            $report = [
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'service' =>$request->service,
+                'message' => $request->message
+            ];
+            // echo '<pre>';print_r($report);exit;
+            Mail::to('mohamed.safiq@digiclave.com')->send(new ContactFormMail($report));
+            return back()->with('success','Contact Form submitted successfully.');
         } catch (Exception $e) {
-            return back()->with('success',$e->getMessage());
+            return back()->with('error',$e->getMessage());
         }
     }
 

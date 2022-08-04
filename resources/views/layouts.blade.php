@@ -76,6 +76,30 @@
     .credit-card-box .display-tr {
         display: table-row;
     }
+    #captchaBackground {
+    height: 220px;
+    width: 250px;
+    background-color: #2d3748;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+#captchaHeading {
+    color: white;
+}
+#captcha {
+    /*height: 80%;
+    width: 80%;
+    font-size: 30px;
+    letter-spacing: 3px;
+    margin: auto;*/
+    display: block;
+    /*top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;*/
+}
   </style>
 </head>
 <body>

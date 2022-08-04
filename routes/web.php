@@ -18,6 +18,6 @@ Route::get('/', function () {
 });
 
 Route::get('buyproduct/{products}', [ProductsController::class, 'buyproduct'])->name('buyproduct');
-Route::get('store', 'ProductsController@store')->name('store');
+Route::post('store', [ProductsController::class, 'store'])->name('store');
 
 // Route::post('store',[ProductsController::class, 'store']);

@@ -1,42 +1,159 @@
 @include('layouts')
 @section('title')
-    {{ __('Products') }}
+	{{ __('Contact Form') }}
 @endsection
-<?php
-use App\Models\Products;
-$products = Products::all();
-?>
-<div class="col-md-12 mt-4 p-2">
-    <div class="card">
-        <div class="card-header heading">
-            <h5><i class='fas fa-border-all' style='font-size:17px'></i> Products</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <th>Sno</th>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th style="width:45%;">Description</th>
-                    <th>Action</th>
-                </thead>
-                <tbody>
-                    <?php
-                    $sno = 1;
-                    foreach($products as $product)
-                    {
-                        echo "<tr>";
-                        echo "<td>".$sno."</td>";
-                        echo "<td>".$product->field_name."</td>";
-                        echo "<td>".$product->price."</td>";
-                        echo "<td>".$product->description."</td>";
-                        echo "<td><a href='".route('buyproduct',$product)."' class='btn btn-warning'>Buy Now</a></td>";
-                        echo "</tr>";
-                        $sno++;
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<body id="app-layout">
+
+<div class="row">
+  	<div class="col-md-6 offset-3 mt-5">
+		<div class="card card-default credit-card-box">
+			<div class="card-header heading">
+				<h5>Contact Form</h5>
+			</div>
+			<div class="card-body">
+				<div class="col-md-12">
+				  {!! Form::open(['url' => '/store', 'data-parsley-validate', 'id' => 'payment-form','method' => 'post']) !!}
+					@if ($message = Session::get('success'))
+					<div class="alert alert-success alert-block">
+					  <button type="button" class="close" data-dismiss="alert">×</button> 
+							<strong>{{ $message }}</strong>
+					</div>
+					@endif
+					<div class="form-group mt-3" id="product-group">
+						{!! Form::label('plane', 'Name:') !!}
+						{!! Form::text('name', '', [
+							'class'                         => 'form-control',
+							'data-stripe'                   => 'number',
+							'data-parsley-type'             => 'number',
+							'maxlength'                     => '16',
+							'data-parsley-trigger'          => 'change focusout',
+							'data-parsley-class-handler'    => '#cc-group'
+							]) !!}
+					</div>
+					<div class="form-group mt-3" id="cc-group">
+						{!! Form::label(null, 'Phone Number:') !!}
+						{!! Form::text('phone', null, [
+							'class'                         => 'form-control',
+							'required'                      => 'required',
+							'data-stripe'                   => 'number',
+							'data-parsley-type'             => 'number',
+							'maxlength'                     => '16',
+							'data-parsley-trigger'          => 'change focusout',
+							'data-parsley-class-handler'    => '#cc-group'
+							]) !!}
+					</div>
+					<div class="form-group mt-3" id="ccv-group">
+						{!! Form::label(null, 'Email:') !!}
+						{!! Form::text('email', null, [
+							'class'                         => 'form-control',
+							'required'                      => 'required',
+							'data-stripe'                   => 'cvc',
+							'data-parsley-type'             => 'email',
+							'data-parsley-trigger'          => 'change focusout',
+							'data-parsley-class-handler'    => '#ccv-group'
+							]) !!}
+					</div>
+					<div class="form-group mt-3">
+						{!! Form::label(null, 'Services:') !!}
+						<select class="form-control" name="service">
+							<option value="">Select Services</option>
+							<option value="1">Graphics & Design</option>
+							<option value="2">Digital Marketing</option>
+							<option value="3">Writing & Translation</option>
+							<option value="4">Video & Animation</option>
+							<option value="5">Music & Audio</option>
+							<option value="6">Programming & Tech</option>
+							<option value="7">Lifestyle</option>
+						</select>
+					</div>
+					<div class="form-group mt-3">
+						{!! Form::label(null, 'Message:') !!}
+						<textarea class="form-control" name="message"></textarea>
+					</div>
+					<div class="form-control mt-3">
+		            <canvas id="captcha">captcha text</canvas>
+		            <input id="textBox" type="text" name="text" class="form-control" autocomplete="off">
+		            <div id="buttons" class="mt-3">
+		                <button id="refreshButton" type="button">Refresh</button>
+		            </div>
+		            <span id="output"></span>
+		        	</div>
+				  	<div class="form-group mt-5 text-center">
+						{!! Form::submit('Submit', ['class' => 'btn btn-lg btn-block heading btn-order', 'id' => 'submitButton', 'style' => 'margin-bottom: 10px;']) !!}
+				  	</div>
+				  	<div class="row">
+						<div class="col-md-12">
+							<span class="payment-errors" style="color: red;margin-top:10px;"></span>
+						</div>
+				  	</div>
+			  		{!! Form::close() !!}
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+</body>
+<script>
+	// document.querySelector() is used to select an element from the document using its ID
+let captchaText = document.querySelector('#captcha');
+var ctx = captchaText.getContext("2d");
+ctx.font = "30px Roboto";
+// ctx.fillStyle = "#08e5ff";
+
+let userText = document.querySelector('#textBox');
+let submitButton = document.querySelector('#submitButton');
+let output = document.querySelector('#output');
+let refreshButton = document.querySelector('#refreshButton');
+
+// alphaNums contains the characters with which you want to create the CAPTCHA
+let alphaNums = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+let emptyArr = [];
+// This loop generates a random string of 7 characters using alphaNums
+// Further this string is displayed as a CAPTCHA
+for (let i = 1; i <= 7; i++) {
+    emptyArr.push(alphaNums[Math.floor(Math.random() * alphaNums.length)]);
+}
+var c = emptyArr.join('');
+ctx.fillText(emptyArr.join(''),captchaText.width/4, captchaText.height/2);
+
+// This event listener is stimulated whenever the user press the "Enter" button
+// "Correct!" or "Incorrect, please try again" message is
+// displayed after validating the input text with CAPTCHA
+userText.addEventListener('keyup', function(e) {
+    // Key Code Value of "Enter" Button is 13
+    if (e.keyCode === 13) {
+        if (userText.value === c) {
+            output.classList.add("correctCaptcha");
+            output.innerHTML = "Correct!";
+        } else {
+            output.classList.add("incorrectCaptcha");
+            output.innerHTML = "Incorrect, please try again";
+        }
+    }
+});
+// This event listener is stimulated whenever the user clicks the "Submit" button
+// "Correct!" or "Incorrect, please try again" message is
+// displayed after validating the input text with CAPTCHA
+submitButton.addEventListener('click', function() {
+    if (userText.value === c) {
+        output.classList.add("correctCaptcha");
+        output.innerHTML = "Correct!";
+    } else {
+        output.classList.add("incorrectCaptcha");
+        output.innerHTML = "Incorrect, please try again";
+    }
+});
+// This event listener is stimulated whenever the user press the "Refresh" button
+// A new random CAPTCHA is generated and displayed after the user clicks the "Refresh" button
+refreshButton.addEventListener('click', function() {
+    userText.value = "";
+    let refreshArr = [];
+    for (let j = 1; j <= 7; j++) {
+        refreshArr.push(alphaNums[Math.floor(Math.random() * alphaNums.length)]);
+    }
+    ctx.clearRect(0, 0, captchaText.width, captchaText.height);
+    c = refreshArr.join('');
+    ctx.fillText(refreshArr.join(''),captchaText.width/4, captchaText.height/2);
+    output.innerHTML = "";
+});
+</script>
