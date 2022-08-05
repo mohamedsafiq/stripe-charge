@@ -12,7 +12,7 @@
 			</div>
 			<div class="card-body">
 				<div class="col-md-12">
-				  {!! Form::open(['url' => '/store', 'data-parsley-validate', 'id' => 'payment-form','method' => 'post']) !!}
+				  {!! Form::open(['url' => '/store', 'data-parsley-validate', 'id' => 'contact_form','method' => 'post']) !!}
 					@if ($message = Session::get('success'))
 					<div class="alert alert-success alert-block">
 					  <button type="button" class="close" data-dismiss="alert">×</button> 
@@ -20,8 +20,9 @@
 					</div>
 					@endif
 					<div class="form-group mt-3" id="product-group">
-						{!! Form::label('plane', 'Name:') !!}
+						{!! Form::label('plane', 'Name:') !!}<span class="required">*</span>
 						{!! Form::text('name', '', [
+							'id'                            => 'name',
 							'class'                         => 'form-control',
 							'data-stripe'                   => 'number',
 							'data-parsley-type'             => 'number',
@@ -31,10 +32,10 @@
 							]) !!}
 					</div>
 					<div class="form-group mt-3" id="cc-group">
-						{!! Form::label(null, 'Phone Number:') !!}
+						{!! Form::label(null, 'Phone Number:') !!}<span class="required">*</span>
 						{!! Form::text('phone', null, [
+							'id'                            => 'phone',
 							'class'                         => 'form-control',
-							'required'                      => 'required',
 							'data-stripe'                   => 'number',
 							'data-parsley-type'             => 'number',
 							'maxlength'                     => '16',
@@ -43,10 +44,10 @@
 							]) !!}
 					</div>
 					<div class="form-group mt-3" id="ccv-group">
-						{!! Form::label(null, 'Email:') !!}
+						{!! Form::label(null, 'Email:') !!}<span class="required">*</span>
 						{!! Form::text('email', null, [
+							'id'                            => 'email',
 							'class'                         => 'form-control',
-							'required'                      => 'required',
 							'data-stripe'                   => 'cvc',
 							'data-parsley-type'             => 'email',
 							'data-parsley-trigger'          => 'change focusout',
@@ -54,16 +55,16 @@
 							]) !!}
 					</div>
 					<div class="form-group mt-3">
-						{!! Form::label(null, 'Services:') !!}
-						<select class="form-control" name="service">
+						{!! Form::label(null, 'Services:') !!}<span class="required">*</span>
+						<select class="form-control" name="service" id="service">
 							<option value="">Select Services</option>
-							<option value="1">Graphics & Design</option>
-							<option value="2">Digital Marketing</option>
-							<option value="3">Writing & Translation</option>
-							<option value="4">Video & Animation</option>
-							<option value="5">Music & Audio</option>
-							<option value="6">Programming & Tech</option>
-							<option value="7">Lifestyle</option>
+							<option value="Graphics & Design">Graphics & Design</option>
+							<option value="Digital Marketing">Digital Marketing</option>
+							<option value="Writing & Translation">Writing & Translation</option>
+							<option value="Video & Animation">Video & Animation</option>
+							<option value="Music & Audio">Music & Audio</option>
+							<option value="Programming & Tech">Programming & Tech</option>
+							<option value="Lifestyle">Lifestyle</option>
 						</select>
 					</div>
 					<div class="form-group mt-3">
@@ -79,7 +80,7 @@
 		            <span id="output"></span>
 		        	</div>
 				  	<div class="form-group mt-5 text-center">
-						{!! Form::submit('Submit', ['class' => 'btn btn-lg btn-block heading btn-order', 'id' => 'submitButton', 'style' => 'margin-bottom: 10px;']) !!}
+						{!! Form::button('Submit', ['class' => 'btn btn-lg btn-block heading btn-order', 'id' => 'submitButton', 'style' => 'margin-bottom: 10px;', 'onclick' => 'checkform()']) !!}
 				  	</div>
 				  	<div class="row">
 						<div class="col-md-12">
@@ -156,4 +157,42 @@ refreshButton.addEventListener('click', function() {
     ctx.fillText(refreshArr.join(''),captchaText.width/4, captchaText.height/2);
     output.innerHTML = "";
 });
+
+function checkform()
+{
+	var name = $('#name').val();
+	var phone = $('#phone').val();
+	var email = $('#email').val();
+	var service = $('#service').val();
+	$('.error').remove();
+	var error = 0;
+	if(name == '' || name.trim() == '')
+	{
+		$('#name').after('<div class="error">Please Enter the name');
+		error = 1;
+	}
+	if(phone == '' || phone.trim() == '')
+	{
+		$('#phone').after('<div class="error">Please Enter the phone number');
+		error = 1;
+	}
+	if(email == '' || email.trim() == '')
+	{
+		$('#email').after('<div class="error">Please Enter the email');
+		error = 1;
+	}
+	if(service == '')
+	{
+		$('#service').after('<div class="error">Please select the service');
+		error = 1;
+	}
+	if(error == 0)
+	{
+		$('#contact_form').submit();
+	}
+	else
+	{
+		return false;
+	}
+}
 </script>
