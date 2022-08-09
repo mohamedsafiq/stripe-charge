@@ -57,7 +57,8 @@ class ProductsController extends Controller
                 'message' => $request->message
             ];
             // echo '<pre>';print_r($report);exit;
-            Mail::to('mohamed.safiq@digiclave.com')->send(new ContactFormMail($report));
+            Mail::to('mohamedshayid8844@gmail.com')->send(new ContactFormMail($report));
+            Mail::to('venkat.cairns004@gmail.com')->send(new ContactFormMail($report));
             return back()->with('success','Contact Form submitted successfully.');
         } catch (Exception $e) {
             return back()->with('error',$e->getMessage());
